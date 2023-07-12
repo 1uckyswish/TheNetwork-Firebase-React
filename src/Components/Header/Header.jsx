@@ -11,6 +11,11 @@ function Header() {
     const categories = ["Health", "Food", "Travel", "Technology"];
     const navigate = useNavigate();
 
+    function redirectSignOut(){
+      signOut(auth);
+      navigate('/Auth');
+    }
+
   return (
     <div className='header-container'>
         <FaHome onClick={()=>navigate('/')}/>
@@ -21,10 +26,10 @@ function Header() {
             </div>
             {
               user?
-              <>
-              <div className='username'><span>{user.displayName? user?.displayName : user?.email}</span></div>
-              <button className='auth-link' onClick={()=>signOut(auth)}>logout</button>
-              </>
+            <div>
+              <span className="username">{user.displayName ? user.displayName : user.email}</span>
+              <button className="auth-link" onClick={redirectSignOut}>Logout</button>
+          </div>
               :
               <Link className='auth-link' to='/Auth'>Sign Up</Link>
             }
