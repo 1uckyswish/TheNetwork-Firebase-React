@@ -1,8 +1,17 @@
-import {useState} from 'react'
-import "./AddArticle.css"
+import {useState} from 'react';
+import "./AddArticle.css";
+import {ref, uploadBytes, getDownloadURL} from "firebase/storage";
+import {useAuthState} from "react-firebase-hooks/auth";
+import {storage, db, auth} from '../../Config/firebaseConfig';
+import {v4} from 'uuid';
+import { addDoc, collection, Timestamp} from 'firebase/firestore';
+import {toast} from "react-toastify"
+import { useNavigate } from 'react-router-dom';
 
 function AddArticle() {
       const categories = ["Health", "Food", "Travel", "Technology"];
+        const [user] = useAuthState(auth);
+        const navigate = useNavigate()
       const [formData, setFormData] = useState({
         title: '',
         summary: '',
@@ -15,7 +24,36 @@ function AddArticle() {
 
     const handleSubmit = (e)=>{
         e.preventDefault()
-        console.log(e);
+        // create reference for the image
+        const imageRef = ref(storage, `images/${formData.image.name + v4()}`)
+        // now upload the image to bucket
+        uploadBytes(imageRef, formData.image).then(res =>{
+            // console.log(res.ref);
+            // now get url from this ref
+            getDownloadURL(res.ref).then((url)=>{
+                // now we have all data and urls'
+                //make article reference
+                const articleRef = collection(db, 'Articles');
+                //use * ADDdoc*
+                addDoc(articleRef, {
+                    title: formData.title,
+                    summary: formData.summary,
+                    paragraphOne: formData.paragraphOne,
+                    paragraphTwo: formData.paragraphTwo,
+                    paragraphThree: formData.paragraphThree,
+                    category: formData.category,
+                    imageUrl: url,
+                    createdBy: user.displayName,
+                    userId: user.uid,
+                    createdAt: Timestamp.now().toDate(),
+                })
+            }).then(res => {
+                toast('Article Saved Successfully', {type: "success", autoClose: 1000});
+                setTimeout(()=>{
+                    navigate('/')
+                }, 1500)
+            })
+        }).catch(err=> console.error(err))
     };
 
   return (
