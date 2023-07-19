@@ -2,10 +2,12 @@ import React, {useEffect, useState} from 'react'
 import "./Banner.css"
 import { db } from '../../Config/firebaseConfig'
 import { collection, getDocs, query, orderBy, limit} from 'firebase/firestore'
+import { useNavigate } from 'react-router-dom'
 
 function Banner() {
     const [mainArticle, setMainArticle] = useState({});
     const [otherArticles, setOtherArticles] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(
         ()=>{
@@ -32,7 +34,7 @@ function Banner() {
 
   return (
     <div className='banner-container'>
-      <div className="main-article-container" style={{backgroundImage: `url(${mainArticle?.imageUrl})`}}>
+      <div onClick={()=> navigate(`/ArticleDetails/${mainArticle?.id}`)} className="main-article-container" style={{backgroundImage: `url(${mainArticle?.imageUrl})`}}>
         <div className="banner-info">
             <h2>{mainArticle.title}</h2>
             <div className="main-article-info">
@@ -43,7 +45,7 @@ function Banner() {
       <div className="other-articles-container">
         {
             otherArticles.map(item=>{
-               return  <div className="other-article-item" style={{backgroundImage: `url(${item?.imageUrl})`}} key={item?.id}>
+               return  <div className="other-article-item" onClick={()=> navigate(`/ArticleDetails/${item?.id}`)} style={{backgroundImage: `url(${item?.imageUrl})`}} key={item?.id}>
                  <div className="banner-info">
                     <h3>{item?.title}</h3>
                     <p>{item?.createdAt?.toDate().toDateString()}</p>
